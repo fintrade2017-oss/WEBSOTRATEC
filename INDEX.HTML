@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOTRATEC - PRIVATE PROJECT MANAGEMENT COMPANY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <!-- PASO 2.1: AÑADIR LA LIBRERÍA DE SUPABASE -->
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <!-- PASO 2.2: AÑADIR LA LIBRERÍA DE RESEND -->
+    <script src="https://unpkg.com/@resend/resend-js"></script>
+    <style>
+        /* --- PALETA DE COLORES Y VARIABLES --- */
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #D4AF37; /* Dorado */
+            --text-color: #333333;
+            --light-bg: #f8f8f8;
+            --dark-bg: #222222;
+            --white-color: #ffffff;
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background-color: var(--white-color);
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+
+        p {
+            line-height: 1.7;
+        }
+
+        /* --- NAVEGACIÓN --- */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+        }
+
+        .nav-links a {
+            color: var(--white-color);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--secondary-color);
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .language-selector button {
+            background: none;
+            border: 1px solid var(--secondary-color);
+            color: var(--white-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .language-selector button:hover, .language-selector button.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        /* --- SECCIONES DE PÁGINA --- */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* --- HERO SECTION --- */
+        .hero {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('images/GRATITUD.png');
+            background-size: cover;
+            background-position: center;
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white-color);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+        }
+
+        /* --- SECCIONES COMUNES --- */
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .section-title h3 {
+            font-size: 1.3rem;
+            font-weight: normal;
+            color: var(--secondary-color);
+        }
+
+        /* --- VIDEO SECTION --- */
+        .video-section {
+            padding: 40px 0;
+            text-align: center;
+            background-color: var(--light-bg);
+        }
+
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #000;
+            position: relative;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: auto;
+            min-height: 400px;
+            display: block;
+            object-fit: cover;
+        }
+
+        .video-title {
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        /* --- ABOUT PAGE --- */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        .about-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- SERVICES & SECTORS GRIDS --- */
+        .service-grid, .sectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card, .sector-card {
+            background-color: var(--white-color);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover, .sector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- MODIFICACIÓN PARA HACER LAS IMÁGENES MÁS PEQUEÑAS --- */
+        .tech-image {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .tech-image img {
+            max-width: 60%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .sector-image {
+            text-align: center;
+            margin: 20px 0 40px;
+        }
+
+        .sector-image img {
+            max-width: 70%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- CONTACT PAGE --- */
+        .contact-section {
+            background-color: var(--light-bg);
+        }
+        
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .contact-info-item i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .contact-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--white-color);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* --- BOTONES --- */
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #b8941f;
+            color: var(--white-color);
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+        }
+
+        .btn-email {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-email:hover {
+            background-color: #2980b9;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--dark-bg);
+            color: var(--white-color);
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        .footer-logo {
+            height: 40px;
+            margin-bottom: 15px;
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* --- SCORING FORM --- */
+        .scoring-section {
+            background-color: var(--light-bg);
+            padding: 60px 0;
+        }
+
+        .scoring-form {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--white-color);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .scoring-form h3 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .scoring-result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .scoring-result.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .scoring-result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .contact-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* --- LEADS MANAGEMENT --- */
+        .leads-section {
+            background-color: var(--white-color);
+            padding: 40px 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .leads-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .leads-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .leads-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .leads-table th, .leads-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .leads-table th {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-weight: bold;
+        }
+
+        .leads-table tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+
+        .leads-table tr:hover {
+            background-color: #f0f0f0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-badge.accepted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .no-leads {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+        
+        /* PASO 2.2: NUEVOS ESTILOS PARA EL FORMULARIO DE LOGIN */
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .auth-container h2 {
+            margin-bottom: 20px;
+        }
+
+        .auth-container .form-group {
+            text-align: left;
+        }
+
+        .auth-error {
+            color: #e74c3c;
+            margin-top: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        /* --- ESTILOS PARA LA CALCULADORA --- */
+        .calculator-section {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .calculator-section.active {
+            display: block;
+        }
+
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .calculator-header h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .calculator-form {
+            margin-bottom: 30px;
+        }
+
+        .currency-input {
+            display: flex;
+        }
+
+        .currency-input select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            background-color: #f8f8f8;
+            min-width: 100px;
+        }
+
+        .currency-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .calculator-results {
+            display: none;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .calculator-results.active {
+            display: block;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .fee-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .fee-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .fee-item:last-child {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e1e5e9;
+            font-weight: bold;
+        }
+
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .terms-group {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .terms-group input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 4px;
+            transform: scale(1.2);
+            accent-color: var(--secondary-color);
+        }
+
+        .terms-group label {
+            margin-bottom: 0;
+            font-weight: 400;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .confirmation-section {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #d4edda;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            text-align: center;
+        }
+
+        .confirmation-section.active {
+            display: block;
+        }
+
+        .confirmation-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+
+        .btn-reject {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #c82333;
+        }
+
+        .email-notification {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d1ecf1;
+            border-radius: 8px;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .email-notification.active {
+            display: block;
+        }
+        
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 992px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .nav-links {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .nav-links li {
+                margin: 5px 10px;
+            }
+            .tech-image img {
+                max-width: 80%;
+            }
+            .sector-image img {
+                max-width: 85%;
+            }
+            .contact-buttons {
+                flex-direction: column;
+            }
+            .leads-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .leads-table {
+                font-size: 0.9rem;
+            }
+            .leads-table th, .leads-table td {
+                padding: 10px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .confirmation-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo-container">
+                    <img src="images/LOGO.png" alt="SOTRATEC Logo" class="logo">
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home" class="nav-link active" data-es="Inicio" data-en="Home" data-ru="Главная">Inicio</a></li>
+                    <li><a href="#about" class="nav-link" data-es="Sobre Nosotros" data-en="About Us" data-ru="О нас">Sobre Nosotros</a></li>
+                    <li><a href="#services" class="nav-link" data-es="Servicios" data-en="Services" data-ru="Услуги">Servicios</a></li>
+                    <li><a href="#sectors" class="nav-link" data-es="Sectores" data-en="Sectors" data-ru="Секторы">Sectores</a></li>
+                    <li><a href="#contact" class="nav-link" data-es="Contacto" data-en="Contact" data-ru="Контакт">Contacto</a></li>
+                    <li><a href="#scoring" class="nav-link" data-es="Evaluación" data-en="Scoring" data-ru="Оценка">Evaluación</a></li>
+                    <li><a href="#leads" class="nav-link" data-es="Solicitudes" data-en="Leads" data-ru="Запросы">Solicitudes</a></li>
+                </ul>
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="es">ES</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="ru">RU</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- (1) Página de inicio -->
+        <section id="home" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 data-es="SOTRATEC: Liberando el potencial del proyecto desde el concepto hasta el capital" data-en="SOTRATEC: Unlocking project potential from concept to capital" data-ru="SOTRATEC: Раскрытие потенциала проекта от концепции до капитала">SOTRATEC: Liberando el potencial del proyecto desde el concepto hasta el capital</h1>
+                    <p data-es="Como consultoría de asesoramiento y gestión de proyectos de propiedad independiente, brindamos valor tangible a lo largo de todo el ciclo de vida del proyecto..." data-en="As an independent advisory and project management consultancy, we provide tangible value throughout the entire project lifecycle..." data-ru="В качестве независимой консалтинговой компании по консультированию и управлению проектами, мы обеспечиваем реальную ценность на протяжении всего жизненного цикла проекта...">Como consultoría de asesoramiento y gestión de proyectos de propiedad independiente, brindamos valor tangible a lo largo de todo el ciclo de vida del proyecto, empoderando a gobiernos, propietarios de activos y propietarios de proyectos en los sectores de infraestructura y construcción para asegurar financiamiento y alcanzar sus objetivos estratégicos.</p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE VIDEOS AÑADIDA -->
+            <div class="video-section">
+                <div class="container">
+                    <h2 class="video-title" data-es="Conozca más sobre SOTRATEC" data-en="Learn more about SOTRATEC" data-ru="Узнайте больше о SOTRATEC">Conozca más sobre SOTRATEC</h2>
+                    <div class="video-container">
+                        <video id="mainVideo" controls preload="metadata">
+                            <source src="video/español.mp4" type="video/mp4">
+                            Tu navegador no soporta el elemento de video.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="container">
+                    <div class="about-content">
+                        <div class="about-text">
+                            <h3 data-es="Preparación Meticulosa y Ejecución Experta" data-en="Meticulous Preparation and Expert Execution" data-ru="Тщательная подготовка и экспертное исполнение">Preparación Meticulosa y Ejecución Experta</h3>
+                            <p data-es="En Sotratec, entendemos que los proyectos exitosos requieren más que una simple visión: exigen una preparación meticulosa, financiación estratégica y una ejecución experta." data-en="At Sotratec, we understand that successful projects require more than just a vision: they demand meticulous preparation, strategic financing, and expert execution." data-ru="В Sotratec мы понимаем, что успешные проекты требуют не просто видения: они требуют тщательной подготовки, стратегического финансирования и экспертного исполнения.">En Sotratec, entendemos que los proyectos exitosos requieren más que una simple visión: exigen una preparación meticulosa, financiación estratégica y una ejecución experta. Busca profesionales con amplia experiencia que se integren a la perfección con su equipo, aportando información valiosa y garantizando el éxito de su proyecto, a la vez que fomentan las relaciones clave con las partes interesadas.</p>
+                            <p data-es="Nuestro enfoque colaborativo único se adapta con precisión a las necesidades específicas de su proyecto, transformando los desafíos en oportunidades de crecimiento y rentabilidad." data-en="Our unique collaborative approach is precisely tailored to the specific needs of your project, transforming challenges into opportunities for growth and profitability." data-ru="Наш уникальный совместный подход точно адаптирован к конкретным потребностям вашего проекта, превращая проблемы в возможности для роста и прибыльности.">Nuestro enfoque colaborativo único se adapta con precisión a las necesidades específicas de su proyecto. Gracias a nuestro amplio conocimiento del sector y a nuestra trayectoria comprobada, nos especializamos en identificar y descubrir el valor oculto de sus iniciativas, transformando los desafíos en oportunidades de crecimiento y rentabilidad.</p>
+                            <a href="#contact" class="btn" data-es="Contáctenos Hoy" data-en="Contact Us Today" data-ru="Свяжитесь с нами сегодня">Contáctenos Hoy</a>
+                        </div>
+                        <div class="about-image">
+                            <img src="images/APPSOTRATEC.png" alt="Persona interactuando con la tecnología de SOTRATEC">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- (2) SOBRE NOSOTROS Página -->
+        <section id="about" class="page">
+            <div class="container">
+                <div class="section-title">
+                    <h2 data-es="Nuestra experiencia, su ventaja: la historia de Sotratec" data-en="Our expertise, your advantage: the Sotratec story" data-ru="Наш опыт, ваше преимущество: история Sotratec">Nuestra experiencia, su ventaja: la historia de Sotratec</h2>
+                    <h3 data-es="Sotratec se estableció con una misión singular: aprovechar nuestra experiencia en proyectos globales y nuestra profunda perspicacia financiera..." data-en="Sotratec was established with a singular mission: to leverage our global project expertise and deep financial insight..." data-ru="Sotratec была создана с единственной миссией: использовать наш опыт в глобальных проектах и глубокое финансовое понимание...">Sotratec se estableció con una misión singular: aprovechar nuestra experiencia en proyectos globales y nuestra profunda perspicacia financiera para ayudar a los clientes a resolver desafíos complejos, mitigar riesgos y lograr constantemente sus objetivos financieros y de proyecto.</h3>
+                </div>
+                
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3 data-es="Nuestra Fundación y Filosofía" data-en="Our Foundation and Philosophy" data-ru="Наше основание и философия">Nuestra Fundación y Filosofía</h3>
+                        <p data-es="Como empresa privada profesional y firma de gestión de proyectos, Sotratec se compromete a brindar una calidad de servicio excepcional..." data-en="As a professional private company and project management firm, Sotratec is committed to providing exceptional service quality..." data-ru="Как профессиональная частная компания и фирма по управлению проектами, Sotratec обязуется предоставлять исключительное качество обслуживания...">Como empresa privada profesional y firma de gestión de proyectos, Sotratec se compromete a brindar una calidad de servicio excepcional en todos los sectores del mercado. Nos enorgullecemos de nuestro enfoque centrado en el cliente, adaptando cada servicio a sus necesidades y expectativas específicas. Nuestro compromiso se extiende al fomento de relaciones sólidas de colaboración y al aprovechamiento de una red de socios externos de confianza en todo el mundo.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="images/NEGOCIACION.png" alt="Equipo de SOTRATEC en una reunión">
+                    </div>
+                </div>
+
+                <div class="about-content" style="margin-top:40px;">
+                    <div class="about-image">
+                        <img src="images/GRATITUD.png" alt="Liderazgo y colaboración en SOTRATEC">
+                    </div>
+                    <div class="about-text">
+                        <h3 data-es="Nuestro equipo y liderazgo" data-en="Our team and leadership" data-ru="Наша команда и руководство">Nuestro equipo y liderazgo</h3>
+                        <p data-es="Nuestra fortaleza reside en nuestra gente. El equipo directivo de Sotratec aporta una amplia experiencia práctica en el ámbito financiero y bancario..." data-en="Our strength lies in our people. Sotratec's management team brings extensive hands-on experience in the financial and banking sector..." data-ru="Наша сила заключается в наших людях. Руководящая команда Sotratec привносит обширный практический опыт в финансовой и банковской сфере...">Nuestra fortaleza reside en nuestra gente. El equipo directivo de Sotratec aporta una amplia experiencia práctica en el ámbito financiero y bancario, junto con un profundo conocimiento de la gestión de proyectos y las organizaciones de desarrollo. Esta combinación única de experiencia financiera y en ejecución de proyectos, junto con nuestra amplia red profesional, nos permite formar equipos altamente efectivos, ya sea para iniciativas complejas a pequeña escala o para proyectos globales de gran envergadura y multifacéticos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- (3) QUÉ HACEMOS / SERVICIOS Página -->
+        <section id="services" class="page">
+            <div class="container">
+                <div class="section-title">
+                    <h2 data-es="Nuestros servicios: Potenciando el éxito y el futuro financiero de su proyecto" data-en="Our Services: Powering your project's success and financial future" data-ru="Наши услуги: Обеспечение успеха и финансового будущего вашего проекта">Nuestros servicios: Potenciando el éxito y el futuro financiero de su proyecto</h2>
+                    <h3 data-es="Sotratec ofrece servicios integrales de asesoría y gestión de proyectos diseñados para guiar sus proyectos desde la concepción inicial hasta la financiación exitosa..." data-en="Sotratec offers comprehensive advisory and project management services designed to guide your projects from initial conception to successful financing..." data-ru="Sotratec предлагает комплексные консультационные услуги и услуги по управлению проектами, разработанные для сопровождения ваших проектов от первоначальной концепции до успешного финансирования...">Sotratec ofrece servicios integrales de asesoría y gestión de proyectos diseñados para guiar sus proyectos desde la concepción inicial hasta la financiación exitosa, la ejecución meticulosa y la creación de valor sostenible.</h3>
+                </div>
+                
+                <div class="service-grid">
+                    <!-- Servicio 1 -->
+                    <div class="service-card">
+                        <h3 data-es="Debida diligencia y preparación para la financiación del proyecto" data-en="Project Due Diligence and Financing Preparation" data-ru="Комплексная проверка и подготовка к финансированию проекта">Debida diligencia y preparación para la financiación del proyecto</h3>
+                        <p data-es="Nuestra principal fortaleza reside en preparar sus proyectos para una financiación exitosa. Ofrecemos una rigurosa diligencia debida y planificación financiera estratégica para atraer inversores..." data-en="Our primary strength lies in preparing your projects for successful financing. We offer rigorous due diligence and strategic financial planning to attract investors..." data-ru="Наша главная сила заключается в подготовке ваших проектов к успешному финансированию. Мы предлагаем тщательную комплексную проверку и стратегическое финансовое планирование для привлечения инвесторов...">Nuestra principal fortaleza reside en preparar sus proyectos para una financiación exitosa. Ofrecemos una rigurosa diligencia debida y planificación financiera estratégica para atraer inversores, fondos e instituciones financieras, garantizando que su proyecto se presente como una oportunidad de alto valor y bajo riesgo.</p>
+                        <img src="images/LOAN.png" alt="Formulario de solicitud de préstamo en una tablet" style="width:100%; border-radius:8px; margin-top:15px;">
+                    </div>
+                    
+                    <!-- Servicio 2 -->
+                    <div class="service-card">
+                        <h3 data-es="Gestión y Asesoría Integral de Proyectos" data-en="Comprehensive Project Management and Advisory" data-ru="Комплексное управление проектами и консалтинг">Gestión y Asesoría Integral de Proyectos</h3>
+                        <p data-es="Más allá del financiamiento, Sotratec actúa como una extensión de su empresa, brindando gestión experta de proyectos y consultoría estratégica..." data-en="Beyond financing, Sotratec acts as an extension of your firm, providing expert project management and strategic consulting..." data-ru="Помимо финансирования, Sotratec выступает в качестве продолжения вашей компании, предоставляя экспертное управление проектами и стратегические консультации...">Más allá del financiamiento, Sotratec actúa como una extensión de su empresa, brindando gestión experta de proyectos y consultoría estratégica para garantizar que sus proyectos de capital se entreguen a tiempo, dentro del presupuesto y con los más altos estándares de calidad.</p>
+                    </div>
+
+                    <!-- Servicio 3 -->
+                    <div class="service-card">
+                        <h3 data-es="Soluciones tecnológicas" data-en="Technology Solutions" data-ru="Технологические решения">Soluciones tecnológicas</h3>
+                        <p data-es="Combinando nuestra experiencia en asesoría y consultoría con las características innovadoras y de vanguardia de nuestros socios de Soluciones Tecnológicas..." data-en="Combining our advisory and consulting expertise with the innovative, cutting-edge features of our Technology Solutions partners..." data-ru="Объединяя наш опыт в области консалтинга и консультирования с инновационными передовыми функциями наших партнеров по технологическим решениям...">Combinando nuestra experiencia en asesoría y consultoría con las características innovadoras y de vanguardia de nuestros socios de Soluciones Tecnológicas, ofrecemos productos y servicios tecnológicos que facilitan la toma de decisiones estratégicas y operativas más inteligentes.</p>
+                    </div>
+                </div>
+                
+                <div class="tech-image">
+                    <img src="images/TECNO.png" alt="Personal de SOTRATEC usando tecnología de realidad virtual">
+                </div>
+            </div>
+        </section>
+
+        <!-- (4) SECTORES Página -->
+        <section id="sectors" class="page">
+            <div class="container">
+                <div class="section-title">
+                    <h2 data-es="Experiencia sectorial: Soluciones a medida para diversas industrias" data-en="Sector Expertise: Tailored Solutions for Diverse Industries" data-ru="Отраслевая экспертиза: Индивидуальные решения для различных отраслей">Experiencia sectorial: Soluciones a medida para diversas industrias</h2>
+                    <h3 data-es="Sotratec aporta experiencia especializada en gestión y financiación de proyectos a una amplia gama de sectores críticos..." data-en="Sotratec brings specialized project management and financing expertise to a wide range of critical sectors..." data-ru="Sotratec привносит специализированные знания в области управления проектами и финансирования в широкий спектр ключевых отраслей...">Sotratec aporta experiencia especializada en gestión y financiación de proyectos a una amplia gama de sectores críticos, comprendiendo los desafíos y oportunidades únicos de cada uno.</h3>
+                </div>
+
+                <div class="sector-image">
+                    <img src="images/EXPED.png" alt="Entorno de oficina profesional de SOTRATEC" data-es="Entorno de oficina profesional de SOTRATEC" data-en="SOTRATEC professional office environment" data-ru="Профессиональная офисная среда SOTRATEC">
+                </div>
+
+                <div class="sectors-grid">
+                    <div class="sector-card">
+                        <h3 data-es="Infraestructura" data-en="Infrastructure" data-ru="Инфраструктура">Infraestructura</h3>
+                        <p data-es="Desde las redes de transporte hasta los servicios públicos, navegamos por las complejidades del desarrollo de infraestructura a gran escala..." data-en="From transportation networks to utilities, we navigate complexities of large-scale infrastructure development..." data-ru="От транспортных сетей до коммунальных услуг мы справляемся со сложностями развития крупномасштабной инфраструктуры...">Desde las redes de transporte hasta los servicios públicos, navegamos por las complejidades del desarrollo de infraestructura a gran escala, garantizando la bancabilidad y una entrega eficiente.</p>
+                    </div>
+                    <div class="sector-card">
+                        <h3 data-es="Petróleo y gas" data-en="Oil and Gas" data-ru="Нефть и газ">Petróleo y gas</h3>
+                        <p data-es="Gestión experta de proyectos upstream, midstream y downstream, centrándonos en la mitigación de riesgos..." data-en="Expert management of upstream, midstream, and downstream projects, focusing on risk mitigation..." data-ru="Экспертное управление проектами upstream, midstream и downstream с упором на смягчение рисков...">Gestión experta de proyectos upstream, midstream y downstream, centrándonos en la mitigación de riesgos, el cumplimiento normativo y la estructuración financiera sólida.</p>
+                    </div>
+                    <div class="sector-card">
+                        <h3 data-es="Minería" data-en="Mining" data-ru="Горнодобывающая промышленность">Minería</h3>
+                        <p data-es="Conocimiento especializado en la preparación y gestión de emprendimientos mineros, desde el financiamiento de la exploración..." data-en="Specialized knowledge in preparing and managing mining ventures, from exploration financing..." data-ru="Специализированные знания в подготовке и управлении горнодобывающими предприятиями, от финансирования разведки...">Conocimiento especializado en la preparación y gestión de emprendimientos mineros (Oro, Metales, Piedras Preciosas), desde el financiamiento de la exploración hasta la optimización operacional y el cumplimiento ambiental.</p>
+                    </div>
+                    <div class="sector-card">
+                        <h3 data-es="Proyectos de energía verde" data-en="Green Energy Projects" data-ru="Проекты зеленой энергетики">Proyectos de energía verde</h3>
+                        <p data-es="Impulsamos el futuro del desarrollo sostenible, ayudamos con el financiamiento y la gestión de proyectos para iniciativas de energía renovable..." data-en="We drive the future of sustainable development, assisting with financing and project management for renewable energy initiatives..." data-ru="Мы ведем будущее устойчивого развития, помогая с финансированием и управлением проектами в области возобновляемой энергии...">Impulsamos el futuro del desarrollo sostenible, ayudamos con el financiamiento y la gestión de proyectos para iniciativas de energía renovable, incluidas la solar, la eólica y otras tecnologías verdes.</p>
+                    </div>
+                    <div class="sector-card">
+                        <h3 data-es="Sectores de la construcción" data-en="Construction Sectors" data-ru="Строительные сектора">Sectores de la construcción</h3>
+                        <p data-es="Apoyo integral para proyectos de construcción comerciales, residenciales e industriales, garantizando viabilidad financiera..." data-en="Comprehensive support for commercial, residential, and industrial construction projects, ensuring financial viability..." data-ru="Комплексная поддержка коммерческих, жилых и промышленных строительных проектов, обеспечивая финансовую жизнеспособность...">Apoyo integral para proyectos de construcción comerciales, residenciales e industriales, garantizando viabilidad financiera, gestión eficiente de la construcción y entrega de calidad.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- (5) Página CONTÁCTENOS -->
+        <section id="contact" class="page">
+            <div class="contact-section">
+                <div class="container">
+                    <div class="section-title">
+                        <h2 data-es="Asociese con Sotratec: Hablemos de su proyecto" data-en="Partner with SotrateC: Let's discuss your project" data-ru="Сотрудничайте с SotrateC: Давайте обсудим ваш проект">Asociese con Sotratec: Hablemos de su proyecto</h2>
+                        <h3 data-es="¿Listo para aprovechar al máximo el potencial de su proyecto? Contáctenos hoy mismo..." data-en="Ready to unlock your project's full potential? Contact us today..." data-ru="Готовы раскрыть весь потенциал вашего проекта? Свяжитесь с нами сегодня...">¿Listo para aprovechar al máximo el potencial de su proyecto? Contáctenos hoy mismo para descubrir cómo nuestros servicios expertos pueden asegurar su éxito.</h3>
+                    </div>
+
+                    <div class="contact-info">
+                        <div class="contact-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <h4 data-es="Correo Electrónico" data-en="Email" data-ru="Электронная почта">Correo Electrónico</h4>
+                            <p>[Su dirección de correo electrónico profesional]</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <i class="fas fa-phone"></i>
+                            <h4 data-es="Teléfono" data-en="Phone" data-ru="Телефон">Teléfono</h4>
+                            <p data-es="España: [Tu número de teléfono para España]" data-en="Spain: [Your phone number for Spain]" data-ru="Испания: [Ваш номер телефона для Испании]">España: [Tu número de teléfono para España]</p>
+                            <p data-es="Dubái: [Su número de teléfono para Dubái]" data-en="Dubai: [Your phone number for Dubai]" data-ru="Дубай: [Ваш номер телефона для Дубая]">Dubái: [Su número de teléfono para Dubái]</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h4 data-es="Oficinas" data-en="Offices" data-ru="Офисы">Oficinas</h4>
+                            <p><strong data-es="España:" data-en="Spain:" data-ru="Испания:">España:</strong> [ Su España DIRECCIÓN ]</p>
+                            <p><strong data-es="Dubái:" data-en="Dubai:" data-ru="Дубай:">Dubái:</strong> [ Su Dubái DIRECCIÓN ]</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-form">
+                        <h3 style="text-align:center; margin-bottom: 30px;" data-es="Formulario de Contacto" data-en="Contact Form" data-ru="Контактная форма">Formulario de Contacto</h3>
+                        <form action="#" method="post" onsubmit="alert('Formulario enviado (simulación).'); return false;">
+                            <div class="form-group">
+                                <label for="name" data-es="Nombre" data-en="Name" data-ru="Имя">Nombre</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="company" data-es="Empresa" data-en="Company" data-ru="Компания">Empresa</label>
+                                <input type="text" id="company" name="company">
+                            </div>
+                            <div class="form-group">
+                                <label for="email" data-es="Correo Electrónico" data-en="Email Address" data-ru="Адрес электронной почты">Correo Electrónico</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message" data-es="Mensaje" data-en="Message" data-ru="Сообщение">Mensaje</label>
+                                <textarea id="message" name="message" required></textarea>
+                            </div>
+                            <button type="submit" class="btn" data-es="Enviar consulta" data-en="Send Inquiry" data-ru="Отправить запрос">Enviar consulta</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- (6) SCORING PAGE -->
+        <section id="scoring" class="page">
+            <div class="scoring-section">
+                <div class="container">
+                    <div class="section-title">
+                        <h2 data-es="Evaluación de Proyectos" data-en="Project Evaluation" data-ru="Оценка проектов">Evaluación de Proyectos</h2>
+                        <h3 data-es="Evalúe su proyecto en menos de 2 minutos" data-en="Evaluate your project in less than 2 minutes" data-ru="Оцените ваш проект менее чем за 2 минуты">Evalúe su proyecto en menos de 2 minutos</h3>
+                    </div>
+                    
+                    <div class="scoring-form">
+                        <h3 data-es="Formulario de Evaluación" data-en="Evaluation Form" data-ru="Форма оценки">Formulario de Evaluación</h3>
+                        <form id="scoringForm">
+                            <div class="form-group">
+                                <label data-es="Nombre del Proyecto" data-en="Project Name" data-ru="Название проекта">Nombre del Proyecto</label>
+                                <input type="text" name="projectName" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label data-es="Ubicación" data-en="Location" data-ru="Местоположение">Ubicación</label>
+                                <input type="text" name="projectLocation" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label data-es="Importe (USD)" data-en="Amount (USD)" data-ru="Сумма (USD)">Importe (USD)</label>
+                                <input type="number" name="projectAmount" placeholder="Mínimo 100,000,000 USD" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label data-es="Actividad del Proyecto" data-en="Project Activity" data-ru="Деятельность проекта">Actividad del Proyecto</label>
+                                <select name="projectActivity" required>
+                                    <option value="">Seleccione una actividad</option>
+                                    <option value="Infraestructura">Infraestructura</option>
+                                    <option value="Generación de energías">Generación de energías</option>
+                                    <option value="Minería">Minería</option>
+                                    <option value="Nuevas tecnologías">Nuevas tecnologías</option>
+                                    <option value="Fármacos">Fármacos</option>
+                                    <option value="Hospitales">Hospitales</option>
+                                    <option value="Formación">Formación</option>
+                                    <option value="Inversión inmobiliaria">Inversión inmobiliaria</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label data-es="Teléfono (WhatsApp)" data-en="Phone (WhatsApp)" data-ru="Телефон (WhatsApp)">Teléfono (WhatsApp)</label>
+                                <input type="tel" name="contactPhone" placeholder="+34 600 000 000" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label data-es="Correo Electrónico" data-en="Email Address" data-ru="Адрес электронной почты">Correo Electrónico</label>
+                                <input type="email" name="contactEmail" required>
+                            </div>
+                            
+                            <button type="submit" class="btn" data-es="Evaluar Proyecto" data-en="Evaluate Project" data-ru="Оценить проект">Evaluar Proyecto</button>
+                        </form>
+                        
+                        <div id="scoringResult" class="scoring-result">
+                            <!-- El resultado se mostrará aquí -->
+                        </div>
+
+                        <!-- SECCIÓN DE LA CALCULADORA (INICIALMENTE OCULTA) -->
+                        <div id="calculatorSection" class="calculator-section">
+                            <div class="calculator-header">
+                                <h3 data-es="Simulador de Costes de Préstamo" data-en="Loan Cost Simulator" data-ru="Калькулятор стоимости кредита">Simulador de Costes de Préstamo</h3>
+                                <p data-es="Calcule el nominal necesario según los costes asociados" data-en="Calculate the required nominal based on associated costs" data-ru="Рассчитайте необходимую номинальную сумму на основе связанных затрат">Calcule el nominal necesario según los costes asociados</p>
+                            </div>
+                            
+                            <div class="calculator-form">
+                                <div class="form-group">
+                                    <label for="netAmount" data-es="Cantidad neta que necesita:" data-en="Net amount you need:" data-ru="Чистая сумма, которая вам нужна:">Cantidad neta que necesita:</label>
+                                    <div class="currency-input">
+                                        <select id="currency">
+                                            <option value="USD" selected>$ (USD)</option>
+                                            <option value="EUR">€ (EUR)</option>
+                                            <option value="GBP">£ (GBP)</option>
+                                            <option value="JPY">¥ (JPY)</option>
+                                            <option value="CHF">CHF</option>
+                                            <option value="CNY">¥ (CNY)</option>
+                                            <option value="RUB">₽ (RUB)</option>
+                                        </select>
+                                        <input type="text" id="netAmount" placeholder="0" onkeyup="formatNumber(this)">
+                                    </div>
+                                </div>
+                                
+                                <div class="info-box">
+                                    <strong data-es="Nota importante:" data-en="Important Note:" data-ru="Важное примечание:">Nota importante:</strong> <span data-es="Importe mínimo 100 Millones de USD. Solo se financia en USD." data-en="Minimum amount 100 Million USD. Financing is only available in USD." data-ru="Минимальная сумма 100 миллионов долларов США. Финансирование доступно только в USD.">Importe mínimo 100 Millones de USD. Solo se financia en USD.</span>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button class="btn" onclick="calculateLoan()" data-es="Calcular préstamo" data-en="Calculate loan" data-ru="Рассчитать кредит">Calcular préstamo</button>
+                                    <button class="btn btn-clear" onclick="clearCalculator()" data-es="Borrar" data-en="Clear" data-ru="Очистить">Borrar</button>
+                                </div>
+                                
+                                <div id="calculatorResults" class="calculator-results">
+                                    <div class="result-item">
+                                        <span class="result-label" data-es="Nominal del préstamo:" data-en="Loan nominal:" data-ru="Номинальная сумма кредита:">Nominal del préstamo:</span>
+                                        <span class="result-value" id="nominalAmount">0,00</span>
+                                    </div>
+                                    
+                                    <div class="fee-details">
+                                        <div class="fee-title" data-es="Desglose de costes:" data-en="Fee breakdown:" data-ru="Детализация комиссий:">Desglose de costes:</div>
+                                        <div class="fee-item">
+                                            <span data-es="DBHK Comisión de apertura (1.5%):" data-en="DBHK Opening commission (1.5%):" data-ru="DBHK Комиссия за открытие (1.5%):">DBHK Comisión de apertura (1.5%):</span>
+                                            <span id="dbhkOpeningFee">0,00</span>
+                                        </div>
+                                        <div class="fee-item">
+                                            <span data-es="DBHK Comisión de estudio (1%):" data-en="DBHK Study commission (1%):" data-ru="DBHK Комиссия за рассмотрение (1%):">DBHK Comisión de estudio (1%):</span>
+                                            <span id="dbhkStudyFee">0,00</span>
+                                        </div>
+                                        <div class="fee-item">
+                                            <span data-es="DBHK Seguro de impago (5%):" data-en="DBHK Non-payment insurance (5%):" data-ru="DBHK Страхование от непогашения (5%):">DBHK Seguro de impago (5%):</span>
+                                            <span id="dbhkInsuranceFee">0,00</span>
+                                        </div>
+                                        <div class="fee-item">
+                                            <span data-es="Comisión Sotratec (5%):" data-en="Sotratec commission (5%):" data-ru="Комиссия Sotratec (5%):">Comisión Sotratec (5%):</span>
+                                            <span id="sotratecFee">0,00</span>
+                                        </div>
+                                        <div class="fee-item">
+                                            <span data-es="Total costes:" data-en="Total fees:" data-ru="Общая сумма комиссий:">Total costes:</span>
+                                            <span id="totalFees">0,00</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-box">
+                                        <strong data-es="Información importante:" data-en="Important information:" data-ru="Важная информация:">Información importante:</strong> 
+                                        <span data-es="El cálculo no incluye intereses ni otros gastos financieros. Los porcentajes se aplican sobre el nominal del préstamo." data-en="The calculation does not include interest or other financial expenses. Percentages are applied to the nominal loan amount." data-ru="Расчет не включает проценты или другие финансовые расходы. Проценты применяются к номинальной сумме кредита.">El cálculo no incluye intereses ni otros gastos financieros. Los porcentajes se aplican sobre el nominal del préstamo.</span>
+                                    </div>
+
+                                    <div class="terms-group">
+                                        <input type="checkbox" id="termsCheckbox" onchange="toggleSubmitButton()">
+                                        <label for="termsCheckbox" data-es="Acepto los términos y condiciones expresados en este documento y autorizo que me contacten para la gestión de esta solicitud." data-en="I accept the terms and conditions expressed in this document and authorize contact for the management of this application." data-ru="Я принимаю условия, изложенные в этом документе, и разрешаю связаться со мной для управления этой заявкой.">Acepto los términos y condiciones expresados en este documento y autorizo que me contacten para la gestión de esta solicitud.</label>
+                                    </div>
+
+                                    <div class="button-group" style="margin-top: 20px;">
+                                        <button class="btn btn-submit" id="submitBtn" onclick="showConfirmation()" disabled data-es="Enviar solicitud" data-en="Submit application" data-ru="Отправить заявку">Enviar solicitud</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN DE CONFIRMACIÓN (INICIALMENTE OCULTA) -->
+                        <div id="confirmationSection" class="confirmation-section">
+                            <h4 data-es="¿Desea continuar con el proceso de financiación?" data-en="Do you want to continue with the financing process?" data-ru="Хотите продолжить процесс финансирования?">¿Desea continuar con el proceso de financiación?</h4>
+                            <p data-es="Si confirma, nos pondremos en contacto con usted a la mayor brevedad posible para continuar con la tramitación." data-en="If you confirm, we will contact you as soon as possible to continue with the processing." data-ru="Если вы подтвердите, мы свяжемся с вами в кратчайшие сроки для продолжения оформления.">Si confirma, nos pondremos en contacto con usted a la mayor brevedad posible para continuar con la tramitación.</p>
+                            
+                            <div class="confirmation-buttons">
+                                <button class="btn btn-approve" onclick="confirmAndSendEmail()" data-es="Sí, deseo continuar" data-en="Yes, I want to continue" data-ru="Да, я хочу продолжить">Sí, deseo continuar</button>
+                                <button class="btn btn-reject" onclick="cancelProcess()" data-es="No, gracias" data-en="No, thank you" data-ru="Нет, спасибо">No, gracias</button>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN DE NOTIFICACIÓN DE CORREO (INICIALMENTE OCULTA) -->
+                        <div id="emailNotification" class="email-notification">
+                            <h4 data-es="¡Gracias por su confianza!" data-en="Thank you for your trust!" data-ru="Спасибо за ваше доверие!">¡Gracias por su confianza!</h4>
+                            <p data-es="Hemos enviado un correo electrónico confirmando su solicitud. Nos pondremos en contacto con usted a la mayor brevedad posible." data-en="We have sent an email confirming your request. We will contact you as soon as possible." data-ru="Мы отправили электронное письмо с подтверждением вашего запроса. Мы свяжемся с вами в кратчайшие сроки.">Hemos enviado un correo electrónico confirmando su solicitud. Nos pondremos en contacto con usted a la mayor brevedad posible.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- (7) LEADS MANAGEMENT PAGE -->
+        <section id="leads" class="page">
+            <div class="leads-section">
+                <div class="container">
+                    <div class="section-title">
+                        <h2 data-es="Gestión de Solicitudes" data-en="Leads Management" data-ru="Управление запросами">Gestión de Solicitudes</h2>
+                        <h3 data-es="Visualice y gestione todas las solicitudes de proyectos recibidas" data-en="View and manage all project requests received" data-ru="Просматривайте и управляйте всеми полученными запросами проектов">Visualice y gestione todas las solicitudes de proyectos recibidas</h3>
+                    </div>
+                    
+                    <div class="leads-container">
+                        <div class="leads-header">
+                            <h3 data-es="Solicitudes Recibidas" data-en="Received Leads" data-ru="Полученные запросы">Solicitudes Recibidas</h3>
+                            <div>
+                                <button id="refreshLeads" class="btn" style="margin-right: 10px;" data-es="Actualizar" data-en="Refresh" data-ru="Обновить">Actualizar</button>
+                                <button id="exportLeads" class="btn" data-es="Exportar Datos" data-en="Export Data" data-ru="Экспорт данных">Exportar Datos</button>
+                            </div>
+                        </div>
+                        
+                        <div id="leadsTableContainer">
+                            <!-- La tabla de leads se generará aquí con JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- (8) LOGIN PAGE (FORMULARIO DE AUTENTICACIÓN) -->
+        <section id="login" class="page">
+             <div class="container">
+                <div class="auth-container">
+                    <img src="images/LOGO.png" alt="SOTRATEC Logo" style="height: 60px; margin-bottom: 20px;">
+                    <h2 data-es="Acceso de Equipo" data-en="Team Access" data-ru="Доступ команды">Acceso de Equipo</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="login-email" data-es="Correo Electrónico" data-en="Email" data-ru="Электронная почта">Correo Electrónico</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password" data-es="Contraseña" data-en="Password" data-ru="Пароль">Contraseña</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn" data-es="Iniciar Sesión" data-en="Log In" data-ru="Войти">Iniciar Sesión</button>
+                        <div id="login-error" class="auth-error"></div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <img src="images/BOTONSOTRATECAPPFONDOAZUL.png" alt="SOTRATEC Logo" class="footer-logo">
+            <p class="copyright" data-es="© 2025 SOTRATEC. Todos los derechos reservados." data-en="© 2025 SOTRATEC. All Rights Reserved." data-ru="© 2025 SOTRATEC. Все права защищены.">© 2025 SOTRATEC. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONFIGURACIÓN DE SUPABASE ---
+            // ¡IMPORTANTE! REEMPLAZA ESTOS VALORES CON LOS TUYOS
+            const SUPABASE_URL = 'https://mgtwamzfqiduzenvdojk.supabase.co'; 
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ndHdhbXpmcWlkdXplbnZkb2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2ODk3ODEsImV4cCI6MjA4MTI2NTc4MX0.09h9gDL-dM5vnf5-x1k_LtkSbg7_gni7o2mdsLppqo8'; 
+            const { createClient } = window.supabase;
+            const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // --- ESTADO DE LA APLICACIÓN ---
+            let currentUser = null;
+            let currentLang = 'es';
+            let currentLeadData = null; // Para almacenar los datos del lead actual
+
+            // --- MENSAJES POR IDIOMA ---
+            const MESSAGES = {
+                es: {
+                    projectAccepted: "¡Proyecto ACEPTADO!",
+                    projectRejected: "Proyecto NO Aceptado",
+                    projectNotFitPolicy: "Su proyecto no encaja con la política de inversión del Grupo Inversor.",
+                    projectNotFitProfile: "Su proyecto no encaja actualmente en nuestro perfil de inversión.",
+                    willContactSoon: "En breve recibirá un correo/WhatsApp con la operativa a seguir.",
+                    sending: "Enviando...",
+                    success: "¡Solicitud enviada con éxito!",
+                    error: "Error al enviar la solicitud. Inténtelo de nuevo.",
+                    loginError: "Email o contraseña incorrectos.",
+                    loadingLeads: "Cargando solicitudes...",
+                    noLeads: "No hay solicitudes registradas.",
+                    confirmDelete: "¿Está seguro de que desea eliminar esta solicitud?",
+                    emailSent: "Correo electrónico enviado correctamente.",
+                    emailError: "Error al enviar el correo electrónico."
+                },
+                en: {
+                    projectAccepted: "Project ACCEPTED!",
+                    projectRejected: "Project NOT Accepted",
+                    projectNotFitPolicy: "Your project does not fit the investment policy of the Investor Group.",
+                    projectNotFitProfile: "Your project does not currently fit our investment profile.",
+                    willContactSoon: "You will soon receive an email/WhatsApp with the operating instructions.",
+                    sending: "Sending...",
+                    success: "Request sent successfully!",
+                    error: "Error sending request. Please try again.",
+                    loginError: "Incorrect email or password.",
+                    loadingLeads: "Loading leads...",
+                    noLeads: "No registered leads.",
+                    confirmDelete: "Are you sure you want to delete this request?",
+                    emailSent: "Email sent successfully.",
+                    emailError: "Error sending email."
+                },
+                ru: {
+                    projectAccepted: "Проект ПРИНЯТ!",
+                    projectRejected: "Проект НЕ принят",
+                    projectNotFitPolicy: "Ваш проект не соответствует инвестиционной политике Инвесторской Группы.",
+                    projectNotFitProfile: "Ваш проект в настоящее время не соответствует нашему инвестиционному профилю.",
+                    willContactSoon: "Вскоре вы получите письмо/WhatsApp с инструкциями по эксплуатации.",
+                    sending: "Отправка...",
+                    success: "Запрос успешно отправлен!",
+                    error: "Ошибка при отправке запроса. Попробуйте еще раз.",
+                    loginError: "Неверный адрес электронной почты или пароль.",
+                    loadingLeads: "Загрузка запросов...",
+                    noLeads: "Нет зарегистрированных запросов.",
+                    confirmDelete: "Вы уверены, что хотите удалить этот запрос?",
+                    emailSent: "Электронное письмо успешно отправлено.",
+                    emailError: "Ошибка при отправке электронного письма."
+                }
+            };
+
+            // --- FUNCIONES DE INTERFAZ (UI) ---
+
+            function showPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + pageId) {
+                        link.classList.add('active');
+                    }
+                });
+                window.scrollTo(0, 0);
+            }
+
+            function changeLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang;
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+                });
+
+                document.querySelectorAll('[data-es]').forEach(el => {
+                    const translation = el.getAttribute(`data-${lang}`);
+                    if (translation) {
+                        if (el.innerHTML.includes('<')) { el.innerHTML = translation; } 
+                        else { el.textContent = translation; }
+                    }
+                });
+
+                const mainVideo = document.getElementById('mainVideo');
+                if (mainVideo) {
+                    const videoSrc = `video/${lang === 'es' ? 'español' : lang === 'en' ? 'ingles' : 'rus'}.mp4`;
+                    mainVideo.src = videoSrc;
+                    mainVideo.load();
+                }
+            }
+            
+            async function handleScoringFormSubmit(e) {
+                e.preventDefault();
+                const form = e.target;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const resultDiv = document.getElementById('scoringResult');
+                const calculatorSection = document.getElementById('calculatorSection');
+                const messages = MESSAGES[currentLang];
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = messages.sending;
+                resultDiv.style.display = 'none';
+                calculatorSection.classList.remove('active');
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                const status = (data.projectActivity === "Otros") ? "Rechazado" : "Aceptado";
+
+                try {
+                    const { error } = await supabase.from('leads').insert([{
+                        project_name: data.projectName,
+                        project_location: data.projectLocation,
+                        project_amount: data.projectAmount,
+                        project_activity: data.projectActivity,
+                        contact_phone: data.contactPhone,
+                        contact_email: data.contactEmail,
+                        status: status
+                    }]);
+
+                    if (error) throw error;
+
+                    // Guardar los datos del lead para usarlos más tarde
+                    currentLeadData = {
+                        ...data,
+                        status: status
+                    };
+
+                    const isSuccess = status === 'Aceptado';
+                    resultDiv.innerHTML = `
+                        <h4>${isSuccess ? '✅' : '❌'} ${isSuccess ? messages.projectAccepted : messages.projectRejected}</h4>
+                        <p>${isSuccess ? messages.willContactSoon : messages.projectNotFitProfile}</p>
+                    `;
+                    resultDiv.className = `scoring-result ${isSuccess ? 'success' : 'error'}`;
+                    resultDiv.style.display = 'block';
+
+                    // Si el proyecto es aceptado, mostrar la calculadora
+                    if (isSuccess) {
+                        // Pasar el importe del proyecto a la calculadora
+                        document.getElementById('netAmount').value = data.projectAmount;
+                        
+                        // Mostrar la calculadora
+                        calculatorSection.classList.add('active');
+                        
+                        // Desplazarse a la calculadora
+                        calculatorSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+
+                } catch (err) {
+                    console.error('Error saving lead:', err);
+                    alert(messages.error);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Evaluar Proyecto";
+                }
+            }
+
+            // --- FUNCIONES DE LA CALCULADORA ---
+            
+            // Función para formatear el número mientras se escribe
+            function formatNumber(input) {
+                // Eliminar caracteres no numéricos excepto coma y punto
+                let value = input.value.replace(/[^\d.,]/g, '');
+                
+                // Reemplazar comas por puntos para normalizar
+                value = value.replace(',', '.');
+                
+                // Si hay más de un punto, mantener solo el último
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+                }
+                
+                // Si no está vacío, formatear
+                if (value !== '') {
+                    // Separar parte entera y decimal
+                    let integerPart = value;
+                    let decimalPart = '';
+                    
+                    if (value.includes('.')) {
+                        const splitValue = value.split('.');
+                        integerPart = splitValue[0];
+                        decimalPart = '.' + splitValue[1];
+                    }
+                    
+                    // Formatear parte entera con puntos cada 3 dígitos
+                    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    
+                    // Unir partes
+                    input.value = integerPart + decimalPart;
+                }
+            }
+            
+            // Función para formatear moneda según el idioma
+            function formatCurrency(amount, currency) {
+                const options = {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                };
+                
+                // Configuración regional según el idioma
+                let locale;
+                switch (currentLang) {
+                    case 'es': locale = 'es-ES'; break;
+                    case 'en': locale = 'en-US'; break;
+                    case 'ru': locale = 'ru-RU'; break;
+                    default: locale = 'es-ES';
+                }
+                
+                // Formatear según la configuración regional
+                let formattedAmount = new Intl.NumberFormat(locale, options).format(amount);
+                
+                // Añadir símbolo de moneda
+                const currencySymbol = getCurrencySymbol(currency);
+                
+                // Posición del símbolo según el idioma
+                if (currentLang === 'en' || currentLang === 'ru') {
+                    return currencySymbol + formattedAmount;
+                } else {
+                    return formattedAmount + ' ' + currencySymbol;
+                }
+            }
+            
+            // Función para obtener el símbolo de moneda
+            function getCurrencySymbol(currency) {
+                const symbols = {
+                    'EUR': '€',
+                    'USD': '$',
+                    'GBP': '£',
+                    'JPY': '¥',
+                    'CHF': 'CHF',
+                    'CNY': '¥',
+                    'RUB': '₽'
+                };
+                return symbols[currency] || currency;
+            }
+            
+            // Función para redondear al alza al múltiplo más cercano
+            function roundUpToNearest(amount, nearest) {
+                return Math.ceil(amount / nearest) * nearest;
+            }
+            
+            // Función para limpiar la calculadora
+            function clearCalculator() {
+                document.getElementById('netAmount').value = '';
+                document.getElementById('calculatorResults').classList.remove('active');
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('termsCheckbox').checked = false;
+            }
+            
+            // Función para habilitar/deshabilitar el botón de enviar
+            function toggleSubmitButton() {
+                const submitBtn = document.getElementById('submitBtn');
+                const isChecked = document.getElementById('termsCheckbox').checked;
+                submitBtn.disabled = !isChecked;
+            }
+
+            // Función para calcular el préstamo
+            function calculateLoan() {
+                // Obtener la cantidad neta ingresada
+                const netAmountText = document.getElementById('netAmount').value;
+                const netAmount = parseFloat(netAmountText.replace(/\./g, '').replace(',', '.'));
+                const currency = document.getElementById('currency').value;
+                
+                if (isNaN(netAmount) || netAmount <= 0) {
+                    alert(MESSAGES[currentLang].invalidAmount || "Por favor, ingrese una cantidad válida");
+                    return;
+                }
+
+                // Validar moneda e importe mínimo
+                if (currency !== 'USD' || netAmount < 100000000) {
+                    alert(MESSAGES[currentLang].minimumAmountError || "El importe mínimo es de 100 millones y la financiación es solo en USD (Dólares Americanos).");
+                    return;
+                }
+                
+                // Porcentajes de los costes
+                const dbhkOpeningFeePercent = 0.015; // 1.5%
+                const dbhkStudyFeePercent = 0.01;    // 1%
+                const dbhkInsuranceFeePercent = 0.05; // 5%
+                const sotratecFeePercent = 0.05;      // 5%
+                
+                // Calcular el total de porcentajes
+                const totalFeesPercent = dbhkOpeningFeePercent + dbhkStudyFeePercent + dbhkInsuranceFeePercent + sotratecFeePercent;
+                
+                // Fórmula: Nominal = Cantidad neta / (1 - total de porcentajes)
+                let nominalAmount = netAmount / (1 - totalFeesPercent);
+                
+                // Redondear al alza al múltiplo de 100 más cercano
+                const originalNominal = nominalAmount;
+                nominalAmount = roundUpToNearest(nominalAmount, 100);
+                
+                // Calcular cada coste individual
+                const dbhkOpeningFee = nominalAmount * dbhkOpeningFeePercent;
+                const dbhkStudyFee = nominalAmount * dbhkStudyFeePercent;
+                const dbhkInsuranceFee = nominalAmount * dbhkInsuranceFeePercent;
+                const sotratecFee = nominalAmount * sotratecFeePercent;
+                
+                // Total de costes
+                const totalFees = dbhkOpeningFee + dbhkStudyFee + dbhkInsuranceFee + sotratecFee;
+                
+                // Mostrar resultados
+                document.getElementById('nominalAmount').textContent = formatCurrency(nominalAmount, currency);
+                document.getElementById('dbhkOpeningFee').textContent = formatCurrency(dbhkOpeningFee, currency);
+                document.getElementById('dbhkStudyFee').textContent = formatCurrency(dbhkStudyFee, currency);
+                document.getElementById('dbhkInsuranceFee').textContent = formatCurrency(dbhkInsuranceFee, currency);
+                document.getElementById('sotratecFee').textContent = formatCurrency(sotratecFee, currency);
+                document.getElementById('totalFees').textContent = formatCurrency(totalFees, currency);
+                
+                // Mostrar sección de resultados
+                document.getElementById('calculatorResults').classList.add('active');
+            }
+            
+            // Función para mostrar la sección de confirmación
+            function showConfirmation() {
+                document.getElementById('confirmationSection').classList.add('active');
+                document.getElementById('confirmationSection').scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Función para cancelar el proceso
+            function cancelProcess() {
+                document.getElementById('confirmationSection').classList.remove('active');
+                alert(MESSAGES[currentLang].processCancelled || "Proceso cancelado. Puede volver a intentarlo más tarde.");
+            }
+            
+            // Función para confirmar y enviar correo electrónico
+            async function confirmAndSendEmail() {
+                if (!currentLeadData) {
+                    console.error("No hay datos del lead disponibles");
+                    return;
+                }
+                
+                try {
+                    // Actualizar el estado del lead en la base de datos
+                    const { error } = await supabase
+                        .from('leads')
+                        .update({ status: 'Confirmado', calculator_used: true })
+                        .eq('contact_email', currentLeadData.contactEmail);
+                        
+                    if (error) throw error;
+                    
+                    // Enviar correo electrónico (¡AHORA DE VERDAD!)
+                    await sendConfirmationEmail(currentLeadData);
+                    
+                    // Mostrar notificación de correo enviado
+                    document.getElementById('emailNotification').classList.add('active');
+                    document.getElementById('confirmationSection').classList.remove('active');
+                    
+                    // Limpiar el formulario
+                    document.getElementById('scoringForm').reset();
+                    document.getElementById('calculatorSection').classList.remove('active');
+                    document.getElementById('scoringResult').style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error al confirmar y enviar correo:', error);
+                    alert(MESSAGES[currentLang].emailError || "Error al enviar el correo electrónico.");
+                }
+            }
+            
+            // FUNCIÓN PARA ENVIAR CORREO ELECTRÓNICO (¡AHORA DE VERDAD!)
+            async function sendConfirmationEmail(leadData) {
+                console.log("Enviando correo de confirmación a:", leadData.contactEmail);
+
+                // Crea una instancia del cliente de Resend con tu API Key
+                const resend = new Resend("re_ReGNffGH_JWknvtBBZMPWWFi7GZ7VjYwR");
+
+                try {
+                    const { data, error } = await resend.emails.send({
+                        from: 'onboarding@resend.dev', // Puedes cambiar esto por tu correo cuando verifiques tu dominio
+                        to: [leadData.contactEmail],
+                        subject: 'SOTRATEC - Hemos recibido tu solicitud de financiación',
+                        html: `
+                            <h1>¡Gracias por tu confianza en SOTRATEC!</h1>
+                            <p>Hola,</p>
+                            <p>Hemos recibido correctamente tu solicitud para el proyecto "${leadData.projectName}" en ${leadData.project_location}.</p>
+                            <p>Nuestro equipo revisará la información y nos pondremos en contacto contigo a la mayor brevedad posible para continuar con el proceso.</p>
+                            <p>Un saludo,</p>
+                            <p>El equipo de SOTRATEC</p>
+                        `
+                    });
+
+                    if (error) {
+                        console.error("Error al enviar el correo:", error);
+                        return false;
+                    }
+
+                    console.log("Correo enviado correctamente:", data);
+                    return true;
+
+                } catch (err) {
+                    console.error("Error en el proceso de envío:", err);
+                    return false;
+                }
+            }
+
+            async function loadLeadsTable() {
+                const container = document.getElementById('leadsTableContainer');
+                const messages = MESSAGES[currentLang];
+                container.innerHTML = `<p>${messages.loadingLeads}</p>`;
+
+                try {
+                    const { data: leads, error } = await supabase
+                        .from('leads')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+
+                    if (!leads || leads.length === 0) {
+                        container.innerHTML = `<div class="no-leads">${messages.noLeads}</div>`;
+                        return;
+                    }
+
+                    let tableHTML = `
+                        <table class="leads-table">
+                            <thead>
+                                <tr>
+                                    <th data-es="Fecha" data-en="Date" data-ru="Дата">Fecha</th>
+                                    <th data-es="Proyecto" data-en="Project" data-ru="Проект">Proyecto</th>
+                                    <th data-es="Ubicación" data-en="Location" data-ru="Местоположение">Ubicación</th>
+                                    <th data-es="Actividad" data-en="Activity" data-ru="Деятельность">Actividad</th>
+                                    <th data-es="Importe" data-en="Amount" data-ru="Сумма">Importe</th>
+                                    <th data-es="Contacto" data-en="Contact" data-ru="Контакт">Contacto</th>
+                                    <th data-es="Estado" data-en="Status" data-ru="Статус">Estado</th>
+                                    <th data-es="Acciones" data-en="Actions" data-ru="Действия">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    leads.forEach(lead => {
+                        const date = new Date(lead.created_at).toLocaleDateString();
+                        const isAccepted = lead.status === 'Aceptado';
+                        const isConfirmed = lead.status === 'Confirmado';
+                        let statusBadge = '';
+                        
+                        if (isConfirmed) {
+                            statusBadge = `<span class="status-badge accepted">Confirmado</span>`;
+                        } else if (isAccepted) {
+                            statusBadge = `<span class="status-badge accepted">${lead.status}</span>`;
+                        } else {
+                            statusBadge = `<span class="status-badge rejected">${lead.status}</span>`;
+                        }
+                        
+                        tableHTML += `
+                            <tr>
+                                <td>${date}</td>
+                                <td>${lead.project_name}</td>
+                                <td>${lead.project_location}</td>
+                                <td>${lead.project_activity}</td>
+                                <td>$${parseInt(lead.project_amount).toLocaleString()}</td>
+                                <td>${lead.contact_email}<br>${lead.contact_phone}</td>
+                                <td>${statusBadge}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-delete" onclick="deleteLead(${lead.id})" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `</tbody></table>`;
+                    container.innerHTML = tableHTML;
+
+                } catch (err) {
+                    console.error('Error loading leads:', err);
+                    container.innerHTML = `<p class="auth-error">Error al cargar los datos. Verifique su conexión.</p>`;
+                }
+            }
+            
+            async function deleteLead(leadId) {
+                const messages = MESSAGES[currentLang];
+                if (!confirm(messages.confirmDelete)) return;
+
+                try {
+                    const { error } = await supabase.from('leads').delete().eq('id', leadId);
+                    if (error) throw error;
+                    loadLeadsTable(); // Recargar la tabla
+                } catch (err) {
+                    console.error('Error deleting lead:', err);
+                    alert("Error al eliminar la solicitud.");
+                }
+            }
+
+            function exportLeads() {
+                const messages = MESSAGES[currentLang];
+                alert("La función de exportación a CSV requiere una configuración adicional. Por ahora, puede copiar los datos desde la tabla.");
+            }
+
+            // --- MANEJO DE AUTENTICACIÓN ---
+            async function handleLogin(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const errorDiv = document.getElementById('login-error');
+                const messages = MESSAGES[currentLang];
+                
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+                if (error) {
+                    errorDiv.textContent = messages.loginError;
+                } else {
+                    currentUser = data.user;
+                    errorDiv.textContent = '';
+                    showPage('leads');
+                    loadLeadsTable();
+                }
+            }
+
+            function checkAuthState() {
+                supabase.auth.onAuthStateChange((event, session) => {
+                    currentUser = session?.user || null;
+                    console.log("Auth state changed:", event, currentUser);
+                });
+            }
+
+
+            // --- INICIALIZACIÓN Y EVENT LISTENERS ---
+            function init() {
+                checkAuthState();
+                changeLanguage('es');
+
+                // ESTA ES LA PARTE CLAVE
+                // Comprobamos si hay una señal (#) en la URL.
+                // Si la hay, vamos a esa página. Si no, vamos a 'home'.
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    showPage(hash);
+                } else {
+                    showPage('home');
+                }
+
+                // Navegación
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const pageId = this.getAttribute('href').substring(1);
+                        
+                        if (pageId === 'leads') {
+                            if (currentUser) {
+                                showPage('leads');
+                                loadLeadsTable();
+                            } else {
+                                showPage('login');
+                            }
+                        } else {
+                            showPage(pageId);
+                        }
+                    });
+                });
+
+                // Idioma
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.addEventListener('click', () => changeLanguage(btn.getAttribute('data-lang')));
+                });
+
+                // Formularios
+                document.getElementById('scoringForm')?.addEventListener('submit', handleScoringFormSubmit);
+                document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
+                document.getElementById('refreshLeads')?.addEventListener('click', loadLeadsTable);
+                document.getElementById('exportLeads')?.addEventListener('click', exportLeads);
+            }
+
+            init();
+
+            // Hacemos 'deleteLead' global para que pueda ser llamado desde el 'onclick' en la tabla
+            window.deleteLead = deleteLead;
+            
+            // Hacemos globales las funciones de la calculadora
+            window.formatNumber = formatNumber;
+            window.calculateLoan = calculateLoan;
+            window.clearCalculator = clearCalculator;
+            window.toggleSubmitButton = toggleSubmitButton;
+            window.showConfirmation = showConfirmation;
+            window.cancelProcess = cancelProcess;
+            window.confirmAndSendEmail = confirmAndSendEmail;
+        });
+    </script>
+</body>
+</html>

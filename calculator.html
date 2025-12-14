@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Costes de Préstamo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #8B7355 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            max-height: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .language-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        
+        .language-btn:hover, .language-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .currency-input {
+            display: flex;
+        }
+        
+        select {
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+            background: white;
+            border-right: none;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 0 8px 8px 0;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #8B7355;
+            outline: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #000000 0%, #8B7355 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            flex: 1;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 115, 85, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-clear {
+            background: linear-gradient(135deg, #000000 0%, #D4AF37 100%);
+        }
+        
+        .btn-clear:hover:not(:disabled) {
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #8B7355;
+            display: none;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .result-label {
+            color: #555;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .fee-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .fee-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .fee-item:last-child {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e1e5e9;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #8B7355;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .round-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #D4AF37;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+        
+        .asterisk-note {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .asterisk-note strong {
+            color: #343a40;
+        }
+        
+        .currency-note {
+            margin-top: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #8B7355;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .terms-group {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .terms-group input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 4px;
+            transform: scale(1.2);
+            accent-color: #8B7355;
+        }
+        
+        .terms-group label {
+            margin-bottom: 0;
+            font-weight: 400;
+            color: #555;
+            cursor: pointer;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .language-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+                margin: 0 2px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="images/logo.png" alt="Logo" class="logo">
+            <h1 data-i18n="title">Simulador de Costes de Préstamo</h1>
+            <p data-i18n="subtitle">Calcule el nominal necesario según los costes asociados</p>
+            <div class="language-selector">
+                <button class="language-btn active" onclick="changeLanguage('es')">ES</button>
+                <button class="language-btn" onclick="changeLanguage('en')">EN</button>
+                <button class="language-btn" onclick="changeLanguage('fr')">FR</button>
+                <button class="language-btn" onclick="changeLanguage('ru')">RU</button>
+                <button class="language-btn" onclick="changeLanguage('zh')">中文</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="netAmount" data-i18n="netAmountLabel">Cantidad neta que necesita:</label>
+                <div class="currency-input">
+                    <select id="currency">
+                        <option value="USD" selected>$ (USD)</option>
+                        <option value="EUR">€ (EUR)</option>
+                        <option value="GBP">£ (GBP)</option>
+                        <option value="JPY">¥ (JPY)</option>
+                        <option value="CHF">CHF</option>
+                        <option value="CNY">¥ (CNY)</option>
+                        <option value="RUB">₽ (RUB)</option>
+                    </select>
+                    <input type="text" id="netAmount" placeholder="0" onkeyup="formatNumber(this)">
+                </div>
+            </div>
+            
+            <div class="currency-note">
+                <strong data-i18n="currencyNoteTitle">Nota importante:</strong> <span data-i18n="minimumAmountNote">Importe mínimo 100 Millones de USD. Solo se financia en USD.</span>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn" onclick="calculateLoan()" data-i18n="calculateBtn">Calcular préstamo</button>
+                <button class="btn btn-clear" onclick="clearForm()" data-i18n="clearBtn">Borrar</button>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="result-item">
+                    <span class="result-label" data-i18n="nominalAmount">Nominal del préstamo:</span>
+                    <span class="result-value" id="nominalAmount">0,00</span>
+                </div>
+                
+                <div class="fee-details">
+                    <div class="fee-title" data-i18n="feeBreakdown">Desglose de costes:</div>
+                    <div class="fee-item">
+                        <span data-i18n="dbhkOpeningFee">DBHK Comisión de apertura (1.5%):</span>
+                        <span id="dbhkOpeningFee">0,00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span data-i18n="dbhkStudyFee">DBHK Comisión de estudio (1%):</span>
+                        <span id="dbhkStudyFee">0,00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span data-i18n="dbhkInsuranceFee">DBHK Seguro de impago (5%):</span>
+                        <span id="dbhkInsuranceFee">0,00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span data-i18n="sotratecFee">Comisión Sotratec (5%):</span>
+                        <span id="sotratecFee">0,00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span data-i18n="totalFees">Total costes:</span>
+                        <span id="totalFees">0,00</span>
+                    </div>
+                </div>
+                
+                <div class="round-info" id="roundInfo" style="display: none;">
+                    <span data-i18n="roundInfo">El nominal ha sido redondeado al alza para obtener una cifra redonda.</span>
+                </div>
+                
+                <div class="asterisk-note">
+                    <strong>*</strong> <span data-i18n="asteriskText">DBHK abonará los honorarios contratados por el prestatario por obtener la financiación solicitada y autoriza por escrito que lo abone el fondo a la Sociedad Sotratec.</span>
+                </div>
+                
+                <div class="info-box">
+                    <strong data-i18n="infoTitle">Información importante:</strong> 
+                    <span data-i18n="infoText">El cálculo no incluye intereses ni otros gastos financieros. Los porcentajes se aplican sobre el nominal del préstamo.</span>
+                </div>
+
+                <div class="terms-group">
+                    <input type="checkbox" id="termsCheckbox" onchange="toggleSubmitButton()">
+                    <label for="termsCheckbox" data-i18n="termsAndAuthorization">Acepto los términos y condiciones expresados en este documento y autorizo que me contacten para la gestión de esta solicitud.</label>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-submit" id="submitBtn" onclick="submitApplication()" disabled data-i18n="submitBtn">Enviar solicitud</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2025 Cryptotracker by DBHK. <span data-i18n="copyright">Todos los derechos reservados.</span></p>
+    </div>
+
+    <script>
+        // Traducciones para los 5 idiomas
+        const translations = {
+            es: {
+                title: "Simulador de Costes de Préstamo",
+                subtitle: "Calcule el nominal necesario según los costes asociados",
+                netAmountLabel: "Cantidad neta que necesita:",
+                calculateBtn: "Calcular préstamo",
+                clearBtn: "Borrar",
+                submitBtn: "Enviar solicitud",
+                nominalAmount: "Nominal del préstamo:",
+                feeBreakdown: "Desglose de costes:",
+                dbhkOpeningFee: "DBHK Comisión de apertura (1.5%):",
+                dbhkStudyFee: "DBHK Comisión de estudio (1%):",
+                dbhkInsuranceFee: "DBHK Seguro de impago (5%):",
+                sotratecFee: "Comisión Sotratec (5%):",
+                totalFees: "Total costes:",
+                infoTitle: "Información importante:",
+                infoText: "El cálculo no incluye intereses ni otros gastos financieros. Los porcentajes se aplican sobre el nominal del préstamo.",
+                invalidAmount: "Por favor, ingrese una cantidad válida",
+                roundInfo: "El nominal ha sido redondeado al alza para obtener una cifra redonda.",
+                asteriskText: "DBHK abonará los honorarios contratados por el prestatario por obtener la financiación solicitada y autoriza por escrito que lo abone el fondo a la Sociedad Sotratec.",
+                minimumAmountNote: "Importe mínimo 100 Millones de USD. Solo se financia en USD.",
+                minimumAmountError: "El importe mínimo es de 100 millones y la financiación es solo en USD (Dólares Americanos).",
+                currencyNoteTitle: "Nota importante:",
+                copyright: "Todos los derechos reservados.",
+                termsAndAuthorization: "Acepto los términos y condiciones expresados en este documento y autorizo que me contacten para la gestión de esta solicitud.",
+                applicationSubmitted: "¡Solicitud enviada con éxito! Nos pondremos en contacto con usted a la brevedad."
+            },
+            en: {
+                title: "Loan Cost Simulator",
+                subtitle: "Calculate the required nominal based on associated costs",
+                netAmountLabel: "Net amount you need:",
+                calculateBtn: "Calculate loan",
+                clearBtn: "Clear",
+                submitBtn: "Submit application",
+                nominalAmount: "Loan nominal:",
+                feeBreakdown: "Fee breakdown:",
+                dbhkOpeningFee: "DBHK Opening commission (1.5%):",
+                dbhkStudyFee: "DBHK Study commission (1%):",
+                dbhkInsuranceFee: "DBHK Non-payment insurance (5%):",
+                sotratecFee: "Sotratec commission (5%):",
+                totalFees: "Total fees:",
+                infoTitle: "Important information:",
+                infoText: "The calculation does not include interest or other financial expenses. Percentages are applied to the nominal loan amount.",
+                invalidAmount: "Please enter a valid amount",
+                roundInfo: "The nominal has been rounded up to get a round figure.",
+                asteriskText: "DBHK will pay the fees contracted by the borrower to obtain the requested financing and authorizes in writing that the fund pays it to Sotratec Society.",
+                minimumAmountNote: "Minimum amount 100 Million USD. Financing is only available in USD.",
+                minimumAmountError: "The minimum amount is 100 million and financing is only available in USD (US Dollars).",
+                currencyNoteTitle: "Important Note:",
+                copyright: "All rights reserved.",
+                termsAndAuthorization: "I accept the terms and conditions expressed in this document and authorize contact for the management of this application.",
+                applicationSubmitted: "Application submitted successfully! We will contact you shortly."
+            },
+            fr: {
+                title: "Simulateur de Coûts de Prêt",
+                subtitle: "Calculez le nominal requis en fonction des coûts associés",
+                netAmountLabel: "Montant net dont vous avez besoin:",
+                calculateBtn: "Calculer le prêt",
+                clearBtn: "Effacer",
+                submitBtn: "Soumettre la demande",
+                nominalAmount: "Nominal du prêt:",
+                feeBreakdown: "Détail des frais:",
+                dbhkOpeningFee: "DBHK Commission d'ouverture (1,5%):",
+                dbhkStudyFee: "DBHK Commission d'étude (1%):",
+                dbhkInsuranceFee: "DBHK Assurance contre le non-paiement (5%):",
+                sotratecFee: "Commission Sotratec (5%):",
+                totalFees: "Total des frais:",
+                infoTitle: "Information importante:",
+                infoText: "Le calcul n'inclut pas les intérêts ni autres frais financiers. Les pourcentages sont appliqués sur le nominal du prêt.",
+                invalidAmount: "Veuillez saisir un montant valide",
+                roundInfo: "Le nominal a été arrondi à la hausse pour obtenir un chiffre rond.",
+                asteriskText: "DBHK paiera les honoraires contractés par l'emprunteur pour obtenir le financement demandé et autorise par écrit que le fonds le paie à la Société Sotratec.",
+                minimumAmountNote: "Montant minimum 100 millions de USD. Le financement n'est disponible qu'en USD.",
+                minimumAmountError: "Le montant minimum est de 100 millions et le financement n'est disponible qu'en USD (Dollars Américains).",
+                currencyNoteTitle: "Note importante:",
+                copyright: "Tous droits réservés.",
+                termsAndAuthorization: "J'accepte les termes et conditions exprimés dans ce document et autorise la prise de contact pour la gestion de cette demande.",
+                applicationSubmitted: "Demande soumise avec succès ! Nous vous contacterons dans les plus brefs délais."
+            },
+            ru: {
+                title: "Калькулятор стоимости кредита",
+                subtitle: "Рассчитайте необходимую номинальную сумму на основе связанных затрат",
+                netAmountLabel: "Чистая сумма, которая вам нужна:",
+                calculateBtn: "Рассчитать кредит",
+                clearBtn: "Очистить",
+                submitBtn: "Отправить заявку",
+                nominalAmount: "Номинальная сумма кредита:",
+                feeBreakdown: "Детализация комиссий:",
+                dbhkOpeningFee: "DBHK Комиссия за открытие (1,5%):",
+                dbhkStudyFee: "DBHK Комиссия за рассмотрение (1%):",
+                dbhkInsuranceFee: "DBHK Страхование от непогашения (5%):",
+                sotratecFee: "Комиссия Sotratec (5%):",
+                totalFees: "Общая сумма комиссий:",
+                infoTitle: "Важная информация:",
+                infoText: "Расчет не включает проценты или другие финансовые расходы. Проценты применяются к номинальной сумме кредита.",
+                invalidAmount: "Пожалуйста, введите действительную сумму",
+                roundInfo: "Номинал был округлен в большую сторону для получения круглой цифры.",
+                asteriskText: "DBHK оплатит гонорары, заключенные заемщиком для получения запрашиваемого финансирования, и уполномочивает в письменной форме, чтобы фонд выплатил их Обществу Sotratec.",
+                minimumAmountNote: "Минимальная сумма 100 миллионов долларов США. Финансирование доступно только в USD.",
+                minimumAmountError: "Минимальная сумма составляет 100 миллионов, и финансирование доступно только в USD (долларах США).",
+                currencyNoteTitle: "Важное примечание:",
+                copyright: "Все права защищены.",
+                termsAndAuthorization: "Я принимаю условия, изложенные в этом документе, и разрешаю связаться со мной для управления этой заявкой.",
+                applicationSubmitted: "Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время."
+            },
+            zh: {
+                title: "贷款成本模拟器",
+                subtitle: "根据相关成本计算所需名义金额",
+                netAmountLabel: "您需要的净额：",
+                calculateBtn: "计算贷款",
+                clearBtn: "清除",
+                submitBtn: "提交申请",
+                nominalAmount: "贷款名义金额：",
+                feeBreakdown: "费用明细：",
+                dbhkOpeningFee: "DBHK开通佣金（1.5%）：",
+                dbhkStudyFee: "DBHK研究佣金（1%）：",
+                dbhkInsuranceFee: "DBHK违约保险（5%）：",
+                sotratecFee: "Sotratec佣金（5%）：",
+                totalFees: "总费用：",
+                infoTitle: "重要信息：",
+                infoText: "计算不包括利息或其他财务费用。百分比适用于贷款名义金额。",
+                invalidAmount: "请输入有效金额",
+                roundInfo: "名义金额已向上取整以获得整数。",
+                asteriskText: "DBHK将支付借款人为获得所请求融资而签订的费用，并书面授权基金将其支付给Sotratec公司。",
+                minimumAmountNote: "最低金额1亿美元。仅提供美元融资。",
+                minimumAmountError: "最低金额为1亿美元，且仅提供美元（USD）融资。",
+                currencyNoteTitle: "重要提示：",
+                copyright: "版权所有。",
+                termsAndAuthorization: "我接受本文档中表达的条款和条件，并授权为管理此申请而联系我。",
+                applicationSubmitted: "申请已成功提交！我们会尽快与您联系。"
+            }
+        };
+        
+        // Idioma actual
+        let currentLanguage = 'es';
+        
+        // Función para cambiar el idioma
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Actualizar botones de idioma
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Actualizar todos los elementos con atributo data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Actualizar placeholder del input
+            document.getElementById('netAmount').placeholder = '0';
+        }
+        
+        // Función para formatear el número mientras se escribe
+        function formatNumber(input) {
+            // Eliminar caracteres no numéricos excepto coma y punto
+            let value = input.value.replace(/[^\d.,]/g, '');
+            
+            // Reemplazar comas por puntos para normalizar
+            value = value.replace(',', '.');
+            
+            // Si hay más de un punto, mantener solo el último
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+            }
+            
+            // Si no está vacío, formatear
+            if (value !== '') {
+                // Separar parte entera y decimal
+                let integerPart = value;
+                let decimalPart = '';
+                
+                if (value.includes('.')) {
+                    const splitValue = value.split('.');
+                    integerPart = splitValue[0];
+                    decimalPart = '.' + splitValue[1];
+                }
+                
+                // Formatear parte entera con puntos cada 3 dígitos
+                integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                
+                // Unir partes
+                input.value = integerPart + decimalPart;
+            }
+        }
+        
+        // Función para formatear moneda según el idioma
+        function formatCurrency(amount, currency) {
+            const options = {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            };
+            
+            // Configuración regional según el idioma
+            let locale;
+            switch (currentLanguage) {
+                case 'es': locale = 'es-ES'; break;
+                case 'en': locale = 'en-US'; break;
+                case 'fr': locale = 'fr-FR'; break;
+                case 'ru': locale = 'ru-RU'; break;
+                case 'zh': locale = 'zh-CN'; break;
+                default: locale = 'es-ES';
+            }
+            
+            // Formatear según la configuración regional
+            let formattedAmount = new Intl.NumberFormat(locale, options).format(amount);
+            
+            // Añadir símbolo de moneda
+            const currencySymbol = getCurrencySymbol(currency);
+            
+            // Posición del símbolo según el idioma
+            if (currentLanguage === 'en' || currentLanguage === 'zh') {
+                return currencySymbol + formattedAmount;
+            } else {
+                return formattedAmount + ' ' + currencySymbol;
+            }
+        }
+        
+        // Función para obtener el símbolo de moneda
+        function getCurrencySymbol(currency) {
+            const symbols = {
+                'EUR': '€',
+                'USD': '$',
+                'GBP': '£',
+                'JPY': '¥',
+                'CHF': 'CHF',
+                'CNY': '¥',
+                'RUB': '₽'
+            };
+            return symbols[currency] || currency;
+        }
+        
+        // Función para redondear al alza al múltiplo más cercano
+        function roundUpToNearest(amount, nearest) {
+            return Math.ceil(amount / nearest) * nearest;
+        }
+        
+        // Función para limpiar el formulario
+        function clearForm() {
+            document.getElementById('netAmount').value = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('termsCheckbox').checked = false;
+            document.getElementById('submitBtn').disabled = true;
+        }
+        
+        // Función para habilitar/deshabilitar el botón de enviar
+        function toggleSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const isChecked = document.getElementById('termsCheckbox').checked;
+            submitBtn.disabled = !isChecked;
+        }
+
+        function calculateLoan() {
+            // Obtener la cantidad neta ingresada
+            const netAmountText = document.getElementById('netAmount').value;
+            const netAmount = parseFloat(netAmountText.replace(/\./g, '').replace(',', '.'));
+            const currency = document.getElementById('currency').value;
+            
+            if (isNaN(netAmount) || netAmount <= 0) {
+                alert(translations[currentLanguage].invalidAmount);
+                return;
+            }
+
+            // Validar moneda e importe mínimo
+            if (currency !== 'USD' || netAmount < 100000000) {
+                alert(translations[currentLanguage].minimumAmountError);
+                return;
+            }
+            
+            // Porcentajes de los costes
+            const dbhkOpeningFeePercent = 0.015; // 1.5%
+            const dbhkStudyFeePercent = 0.01;    // 1%
+            const dbhkInsuranceFeePercent = 0.05; // 5%
+            const sotratecFeePercent = 0.05;      // 5%
+            
+            // Calcular el total de porcentajes
+            const totalFeesPercent = dbhkOpeningFeePercent + dbhkStudyFeePercent + dbhkInsuranceFeePercent + sotratecFeePercent;
+            
+            // Fórmula: Nominal = Cantidad neta / (1 - total de porcentajes)
+            let nominalAmount = netAmount / (1 - totalFeesPercent);
+            
+            // Redondear al alza al múltiplo de 100 más cercano
+            const originalNominal = nominalAmount;
+            nominalAmount = roundUpToNearest(nominalAmount, 100);
+            
+            // Calcular cada coste individual
+            const dbhkOpeningFee = nominalAmount * dbhkOpeningFeePercent;
+            const dbhkStudyFee = nominalAmount * dbhkStudyFeePercent;
+            const dbhkInsuranceFee = nominalAmount * dbhkInsuranceFeePercent;
+            const sotratecFee = nominalAmount * sotratecFeePercent;
+            
+            // Total de costes
+            const totalFees = dbhkOpeningFee + dbhkStudyFee + dbhkInsuranceFee + sotratecFee;
+            
+            // Mostrar resultados
+            document.getElementById('nominalAmount').textContent = formatCurrency(nominalAmount, currency);
+            document.getElementById('dbhkOpeningFee').textContent = formatCurrency(dbhkOpeningFee, currency);
+            document.getElementById('dbhkStudyFee').textContent = formatCurrency(dbhkStudyFee, currency);
+            document.getElementById('dbhkInsuranceFee').textContent = formatCurrency(dbhkInsuranceFee, currency);
+            document.getElementById('sotratecFee').textContent = formatCurrency(sotratecFee, currency);
+            document.getElementById('totalFees').textContent = formatCurrency(totalFees, currency);
+            
+            // Mostrar información de redondeo si se aplicó
+            if (nominalAmount > originalNominal) {
+                document.getElementById('roundInfo').style.display = 'block';
+            } else {
+                document.getElementById('roundInfo').style.display = 'none';
+            }
+            
+            // Mostrar sección de resultados y el botón de enviar
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'block';
+        }
+        
+        // Función para enviar la solicitud
+        function submitApplication() {
+            alert(translations[currentLanguage].applicationSubmitted);
+            clearForm();
+        }
+        
+        // Permitir cálculo al presionar Enter
+        document.getElementById('netAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateLoan();
+            }
+        });
+    </script>
+</body>
+</html>
