@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <!-- PASO 2.1: AÑADIR LA LIBRERÍA DE SUPABASE -->
-    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2@2"></script>
     <!-- PASO 2.2: AÑADIR LA LIBRERÍA DE RESEND -->
     <script src="https://unpkg.com/@resend/resend-js"></script>
     <style>
@@ -1335,6 +1335,10 @@
             // --- FUNCIONES DE INTERFAZ (UI) ---
 
             function showPage(pageId) {
+                // SEGURIDAD: proteger pestaña Solicitudes — requiere login
+                if (pageId === 'leads' && !currentUser) {
+                    pageId = 'login';
+                }
                 document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
                 const targetPage = document.getElementById(pageId);
                 if (targetPage) {
@@ -1431,7 +1435,7 @@
 
                 } catch (err) {
                     console.error('Error saving lead:', err);
-                    alert(messages.error);
+                    alert('Error Supabase: ' + (err.message || err) + '. Verifica credenciales y tabla leads.');
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Evaluar Proyecto";
@@ -1818,8 +1822,10 @@
                 // Navegación
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.addEventListener('click', function(e) {
+                        const href = this.getAttribute('href');
+                        if (href && href.startsWith('http')) { return; }
                         e.preventDefault();
-                        const pageId = this.getAttribute('href').substring(1);
+                        const pageId = href.substring(1);
                         
                         if (pageId === 'leads') {
                             if (currentUser) {
